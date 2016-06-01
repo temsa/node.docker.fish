@@ -46,9 +46,12 @@ function node.docker
   mkdir -p .docker
   echo "$v" > .docker/node-version
 
+  for e in (env);
+    set environment -e "$e" $environment ;
+  end
 
   echo "Launch NODEJS $v image $p-$s"
-  docker run -it --rm --name "$p-$s" --net="host" -e "PORT=3000" -v "$PWD":/usr/src/app -v /usr/include:/usr/include -v /usr/lib:/usr/lib -w /usr/src/app node:$v node $args ;
+  docker run -it --rm --name "$p-$s" --net="host" $environment -v "$PWD":/usr/src/app -v /usr/include:/usr/include -v /usr/lib:/usr/lib -w /usr/src/app node:$v node $args ;
 end
 
 
@@ -58,6 +61,8 @@ function npm.docker
 
   set pkgversion (cat package.json | json engines.node | xargs semver-node --resolve)
   set cached_node_version (cat .docker/node-version)
+  set p (echo $PWD | sed s/\\/// | sed s/\\//-/g);
+
 
   #echo "argv:" (count $argv)
   #echo (test (count $argv) -gt 1)
@@ -88,23 +93,32 @@ function npm.docker
 
   echo "using NODE version $v"
 
-  set p (echo $PWD | sed s/\\/// | sed s/\\//-/g);
+  for e in (env);
+    set environment -e "$e" $environment ;
+  end
   echo "Launch NPM from NODEJS $v image $p-$s"
-  docker run -it --rm --name "$p-$s" --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm $argv[$n..-1] ;
+  docker run -it --rm --name "$p-$s" $environment --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm $argv[$n..-1] ;
 end
 
 
 function rethinkdb.docker
   mkdir -p ".docker/rethinkdb"
   set p (echo $PWD | sed s/\\/// | sed s/\\//-/g)
+  for e in (env);
+    set environment -e "$e" $environment ;
+  end
   echo "Launch RETHINKDB" $p
-  docker run --name "$p-rethinkdb" --net="host" -v "$PWD/.docker/rethinkdb:/data" -d rethinkdb
+  docker run --name "$p-rethinkdb" $environment --net="host" -v "$PWD/.docker/rethinkdb:/data" -d rethinkdb
 end
 
 
 function es.docker
   mkdir -p ".docker/es"
   set p (echo $PWD | sed s/\\/// | sed s/\\//-/g)
+  for e in (env);
+    set environment -e "$e" $environment ;
+  end
+
   echo "Launch ES" $p
-  docker run --name "$p-es" --net="host" -v "$PWD/.docker/es:/data" -d elasticsearch
+  docker run --name "$p-es" $environment --net="host" -v "$PWD/.docker/es:/data" -d elasticsearch
 end
