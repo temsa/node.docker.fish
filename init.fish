@@ -13,10 +13,6 @@ function node.docker
     set v $cached_node_version
     echo "cached version $v"
 
-  else if test (count $argv) -gt 1
-    set v $argv[1]
-    echo "command line version $v"
-
   else if test -n $pkgversion
     set v $pkgversion
     echo "package version $pkgversion"
@@ -29,12 +25,8 @@ function node.docker
 
   echo "using NODE version $v"
 
-  if test (count $argv) -gt 1
-    set s $argv[2]
-    set args $argv[2..-1]
-
-  else if test (count $argv) -gt 0
-    set s $argv[1]
+  if test (count $argv) -gt 0
+    set s (echo $argv[1] | sed s@[^a-zA-Z0-9_.-]@-@g)
     set args $argv[1..-1]
 
   else
