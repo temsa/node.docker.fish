@@ -89,7 +89,7 @@ function npm.docker
     set environment -e "$e" $environment ;
   end
   echo "Launch NPM from NODEJS $v image $p-$s"
-  docker run -it --rm --name "$p-$s" $environment --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm $argv[$n..-1] ;
+  docker run -it --rm --name "$p-npm" $environment --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm $argv[$n..-1] ;
 end
 
 
@@ -100,7 +100,8 @@ function rethinkdb.docker
     set environment -e "$e" $environment ;
   end
   echo "Launch RETHINKDB" $p
-  docker run --name "$p-rethinkdb" $environment --net="host" -v "$PWD/.docker/rethinkdb:/data" -d rethinkdb
+
+  docker start "$p-rethinkdb"; or docker run --name "$p-rethinkdb" $environment --net="host" -v "$PWD/.docker/rethinkdb:/data" -d rethinkdb
 end
 
 
@@ -112,5 +113,5 @@ function es.docker
   end
 
   echo "Launch ES" $p
-  docker run --name "$p-es" $environment --net="host" -v "$PWD/.docker/es:/data" -d elasticsearch
+  docker start "$p-es"; or docker run --name "$p-es" $environment --net="host" -v "$PWD/.docker/es:/data" -d elasticsearch
 end
