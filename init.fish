@@ -85,11 +85,11 @@ function npm.docker
 
   echo "using NODE version $v"
 
-  for e in (env);
-    set environment -e "$e" $environment ;
-  end
+  #for e in (env);
+  #  set environment -e "$e" $environment ;
+  #end
   echo "Launch NPM from NODEJS $v image $p-$s"
-  docker run -it --rm --name "$p-npm" $environment --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm $argv[$n..-1] ;
+  docker run -it --rm --name "$p-npm" -e "HOME=/" --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm --unsafe-perm $argv[$n..-1] ;
 end
 
 
