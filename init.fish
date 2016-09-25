@@ -6,6 +6,7 @@ function node.docker
   set pkgversion (cat package.json | json engines.node | xargs semver-node --resolve)
   set cached_node_version (cat .docker/node-version)
   set p (echo $PWD | sed s/\\/// | sed s/\\//-/g);
+  set uid (getent passwd | grep "^$USER:" | cut -d":" -f3)
 
   #echo "argv:" (count $argv)
   #echo (test (count $argv) -gt 1)
@@ -43,7 +44,7 @@ function node.docker
   end
 
   echo "Launch NODEJS $v image $p-$s"
-  docker run -it --rm --name "$p-$s" --net="host" $environment -v "$PWD":/usr/src/app -v /usr/include:/usr/include -v /usr/lib:/usr/lib -w /usr/src/app node:$v node $args ;
+  docker run -it --rm --name "$p-$s" --net="host" -u $uid $environment -v "$PWD":/usr/src/app -v /usr/include:/usr/include -v /usr/lib:/usr/lib -w /usr/src/app node:$v node $args ;
 end
 
 
@@ -54,7 +55,7 @@ function npm.docker
   set pkgversion (cat package.json | json engines.node | xargs semver-node --resolve)
   set cached_node_version (cat .docker/node-version)
   set p (echo $PWD | sed s/\\/// | sed s/\\//-/g);
-
+  set uid (getent passwd | grep "^$USER:" | cut -d":" -f3)
 
   #echo "argv:" (count $argv)
   #echo (test (count $argv) -gt 1)
@@ -85,11 +86,11 @@ function npm.docker
 
   echo "using NODE version $v"
 
-  #for e in (env);
-  #  set environment -e "$e" $environment ;
-  #end
+  for e in (env);
+    set environment -e "$e" $environment ;
+  end
   echo "Launch NPM from NODEJS $v image $p-$s"
-  docker run -it --rm --name "$p-npm" -e "HOME=/" --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm --unsafe-perm $argv[$n..-1] ;
+  docker run -it --rm --name "$p-npm" -u $uid $environment -e "HOME=/usr/src/app" --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm --unsafe-perm $argv[$n..-1] ;
 end
 
 
