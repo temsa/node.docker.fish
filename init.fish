@@ -44,7 +44,7 @@ function node.docker
   end
 
   echo "Launch NODEJS $v image $p-$s"
-  docker run -it --rm --name "$p-$s" --net="host" -u $uid $environment -v "$PWD":/usr/src/app -v /usr/include:/usr/include -v /usr/lib:/usr/lib -w /usr/src/app node:$v node $args ;
+  docker start "$p-$s"; and docker logs -f "$p-$s"; or docker run -it --rm --name "$p-$s" --net="host" -u $uid $environment -e "HOME=/usr/src/app" -v "$PWD":/usr/src/app -v /usr/include:/usr/include -v /usr/lib:/usr/lib -w /usr/src/app node:$v node $args ;
 end
 
 
@@ -81,6 +81,8 @@ function npm.docker
 
   end
 
+  set cmd (echo $argv[$n..-1]| sed s@[^0-9a-zA-Z_-]@-@g)
+
   mkdir -p .docker
   echo "$v" > .docker/node-version
 
@@ -89,8 +91,8 @@ function npm.docker
   for e in (env);
     set environment -e "$e" $environment ;
   end
-  echo "Launch NPM from NODEJS $v image $p-$s"
-  docker run -it --rm --name "$p-npm" -u $uid $environment -e "HOME=/usr/src/app" --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm --unsafe-perm $argv[$n..-1] ;
+  echo "Launch NPM from NODEJS $v-npm-$cmd image $p-$s"
+  docker start "$p-npm-$cmd"; and docker logs -f "$p-npm-$cmd"; or docker run -it --rm --name "$p-npm-$cmd" -u $uid $environment -e "HOME=/usr/src/app" --net="host" -P -v "$PWD":/usr/src/app -w /usr/src/app node:$v npm --unsafe-perm $argv[$n..-1] ;
 end
 
 
